@@ -16,6 +16,7 @@ module.exports = {
     'html'
   ],
   'rules': {
+    'indent': ['warn', 4, {"SwitchCase": 1}],
     // allow paren-less arrow functions
     'arrow-parens': 0,
     // allow async-await
