@@ -1,6 +1,21 @@
 <template>
-    <div class='container vert-parent login-parent'>
-        <div class='align-vertical'>
+    <div class='container-fluid'>
+        <div class="align-vertical col-xs-3">
+            <div class='row'>
+                <div class='col-xs-12'>
+                    <h4>...'s card registered successfully!</h4>
+                </div>
+            </div>
+            <br>
+            <div class='row'>
+                <div class='col-xs-12'>
+                    <button type='submit' class='btn btn-block btn-primary' :disabled="!cards.length">
+                        {{cards.length?'Export cards registered in this session':'No cards registered in this session'}}
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="align-vertical col-xs-5">
             <div class='panel' id='loginPanel'>
                 <div class='panel-heading'>
                     <h3 align='center'>Almost There</h3>
@@ -23,21 +38,34 @@
                                 <h5>Once a barcode is entered and a card is scanned, this card will be registered.</h5>
                             </div>
                         </div>
-                        <br>
-                        <div class='row'>
-                            <div class='col-xs-12'>
-                                <h3>...'s card registered successfully!</h3>
-                            </div>
-                        </div>
-                        <br>
-                        <div class='row'>
-                            <div class='col-xs-12'>
-                                <button type='submit' class='btn btn-block btn-primary' :disabled="cards.length === 0">
-                                    Export cards registered in this session
-                                </button>
-                            </div>
-                        </div>
                     </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class='input-group'>
+                <input type='text' class='form-control' v-model='search'
+                       placeholder='search for firstname, lastname or nickname' required>
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button"><i class="fa fa-refresh"></i></button>
+                </span>
+            </div>
+            <ul class="list-group list-group-height" v-if="displaying.length <= maxDisplay">
+                <li class="list-group-item" :class="{'active': selectedIndex === index}" v-for="(student, index) in displaying" @click="selectStudent(index)">
+                    {{student.firstName}} {{student.lastName}} ({{student.preferredName}})
+                </li>
+            </ul>
+            <h3 class="list-group-height" v-else>Please type more letters</h3>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <p v-if="selectedIndex === -1">いいえ</p>
+                    <div class="detail" v-else>
+                        <p>{{magicStudent.firstName}} {{magicStudent.lastName}} ({{magicStudent.preferredName}})</p>
+                        <p>Barcode:{{magicStudent.idNumber}}</p>
+                        <button class='btn btn-block btn-primary' @click="barcode = magicStudent.idNumber">
+                            Insert Barcode
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -55,17 +83,66 @@
                 smart: null,
                 errorCallbackUnsubscriber: null,
                 connectCallbackUnsubscriber: null,
-                cards: []
+                cards: [],
+                search: '',
+                selectedIndex: -1,
+                maxDisplay: 25,
+                students: [
+                    {
+                        lastName: '1da',
+                        firstName: 'lao',
+                        preferredName: 'julao',
+                        idNumber: '123'
+                    },
+                    {
+                        lastName: '2da',
+                        firstName: 'lao',
+                        preferredName: 'julao',
+                        idNumber: '124'
+                    },
+                    {
+                        lastName: '3da',
+                        firstName: 'lao',
+                        preferredName: 'julao',
+                        idNumber: '125'
+                    },
+                    {
+                        lastName: '4da',
+                        firstName: 'lao',
+                        preferredName: 'julao',
+                        idNumber: '126'
+                    }
+                ]
+            }
+        },
+        computed: {
+            displaying () {
+                this.selectedIndex = -1
+                return this.students.filter((s) => {
+                    let sr = this.search.toUpperCase()
+                    return s.lastName.toUpperCase().indexOf(sr) >= 0 || s.firstName.indexOf(sr) >= 0 || s.preferredName.indexOf(sr) >= 0
+                })
+            },
+            magicStudent () {
+                try {
+                    return this.students[this.selectedIndex]
+                } catch (err) {
+                    return null
+                }
             }
         },
         methods: {
             exportCards () {
 
+            },
+            selectStudent (index) {
+                console.log('magic', index)
+                this.selectedIndex = index
             }
         },
         directives: {
             focus: {
-                componentUpdated (el) {
+                inserted (el) {
                     el.focus()
                 }
             }
@@ -99,32 +176,36 @@
     }
 </script>
 <style scoped>
-    .vert-parent {
-        padding: 5% 0;
-    }
-    .login-parent {
-        max-width: 600px;
+    .container-fluid {
+        overflow-y: hidden;
     }
     .align-vertical {
-        padding: 10% 0;
-    }
-    .footer {
-        bottom: 0;
-        width: 100%;
-        /* Set the fixed height of the footer here */
-        height: 40px;
-        background-color: #f0f0f0;
-    }
-    .footer-text-right {
-        margin-right: 20px;
-    }
-    .first {
-        margin-top: 50px;
+        padding: 15% 0;
     }
     .btn {
         margin-bottom: 12px;
     }
-    .input-group {
-        /*margin-bottom: 1em;*/
+    .col-xs-4 {
+        padding: 0;
+        height: 30%;
+    }
+    .list-group {
+        overflow-y: scroll;
+    }
+    .list-group-height {
+        height: calc(96vh - 300px);
+    }
+    .panel {
+        height: 234px;
+    }
+    .list-group-item {
+        font-size: 14pt;
+    }
+    li {
+        height: 60px;
+        line-height: 40px;
+    }
+    .detail {
+        font-size: 14pt;
     }
 </style>
