@@ -6,7 +6,7 @@
 
 <script>
   export default {
-    name: 'spectacle-import_scanner'
+      name: 'spectacle-import_scanner'
   }
 </script>
 

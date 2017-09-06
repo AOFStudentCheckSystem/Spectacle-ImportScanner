@@ -14,7 +14,7 @@
                         </div><!-- Username Field-->
                         <br>
                         <div class='input-group'>
-                            <label class='input-group-addon' for='password'>secret</label>
+                            <label class='input-group-addon' for='password'>password</label>
                             <input type='password' id='password' class='form-control' v-model='password'
                                    placeholder='' required>
                         </div><!-- password Field-->
@@ -44,7 +44,7 @@
         },
         methods: {
             login () {
-
+                this.$router.push({name: 'import-scanner'})
             }
         }
     }

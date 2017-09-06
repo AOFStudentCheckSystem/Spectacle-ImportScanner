@@ -13,8 +13,13 @@ Vue.config.productionTip = false
 
 /* eslint-disable no-new */
 new Vue({
-  components: { App },
-  router,
-  store,
-  template: '<App/>'
+    components: { App },
+    router,
+    store,
+    template: '<App/>'
 }).$mount('#app')
+
+router.beforeEach((to, from, next) => {
+    console.log(to, from)
+    next()
+})
