@@ -10,6 +10,7 @@ import 'font-awesome/css/font-awesome.min.css'
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios
+axios.defaults.baseURL = 'http://api.aofactivities.com/'
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */

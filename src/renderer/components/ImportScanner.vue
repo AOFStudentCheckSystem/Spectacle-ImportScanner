@@ -9,7 +9,7 @@
             <br>
             <div class='row'>
                 <div class='col-xs-12'>
-                    <button type='submit' class='btn btn-block btn-primary' :disabled="!cards.length">
+                    <button @click="exportCards" class='btn btn-block btn-primary' :disabled="!cards.length">
                         {{cards.length?'Export cards registered in this session':'No cards registered in this session'}}
                     </button>
                 </div>
@@ -21,8 +21,8 @@
                     <h3 align='center'>Almost There</h3>
                 </div>
                 <div class='panel-body'>
-                    <form @submit.prevent='exportCards'>
-                        <div class='input-group'>
+                    <form>
+                        <div class='input-group' @keyup.enter="register">
                             <label class='input-group-addon' for='barcode'>Barcode</label>
                             <input type='text' id='barcode' class='form-control' v-model='barcode'
                                    placeholder='' required v-focus>
@@ -35,7 +35,7 @@
                         </div><!-- rfid Field-->
                         <div class='row'>
                             <div class='col-xs-12'>
-                                <h5>Once a barcode is entered and a card is scanned, this card will be registered.</h5>
+                                <h5>Scan card and focus on barcode then press enter to register.</h5>
                             </div>
                         </div>
                     </form>
@@ -132,12 +132,19 @@
             }
         },
         methods: {
-            exportCards () {
-
+            register () {
+                if (this.rfid === '') {
+                    console.log('Wait')
+                } else {
+                    console.log('注册')
+                }
             },
             selectStudent (index) {
-                console.log('magic', index)
+//                console.log('magic', index)
                 this.selectedIndex = index
+            },
+            exportCards () {
+
             }
         },
         directives: {
@@ -148,6 +155,7 @@
             }
         },
         created () {
+            const self = this
             this.smart = new SmartCardController()
             this.errorCallbackUnsubscriber = this.smart.onError((error) => {
                 console.log(error)
@@ -155,7 +163,8 @@
             this.connectCallbackUnsubscriber = this.smart.onConnect((reader) => {
                 console.log(self.currentEvent)
                 reader.onInsert((card) => {
-                    console.log('addRecord', card.atr)
+//                    console.log('addRecord', card.atr)
+                    self.rfid = card.atr
                 })
                 reader.onError((error) => {
                     console.log(error)
