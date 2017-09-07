@@ -1,5 +1,7 @@
-export default {
+import {axia} from '../main'
+
+export default{
     async getStudents () {
-        return (await this.http.get('listall')).data
+        return (await axia.get('listall')).data
     }
 }

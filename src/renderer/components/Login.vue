@@ -21,10 +21,13 @@
                         <br>
                         <div class='row'>
                             <div class='col-xs-12'>
-                                <button type='submit' class='btn btn-block btn-primary' :disabled='isLoggingIn' @click="login">
-                                    {{ isLoggingIn ? 'Logging in...' : 'Log in' }}
+                                <button type='submit' class='btn btn-block btn-primary' :disabled='signingIn'>
+                                    {{ signingIn ? 'Logging in...' : 'Log in' }}
                                 </button>
                             </div>
+                        </div>
+                        <div class="row err" v-if="err">
+                            {{err}}
                         </div>
                     </form>
                 </div>
@@ -33,19 +36,36 @@
     </div>
 </template>
 <script>
+    import {mapActions, mapGetters} from 'vuex'
     export default {
         name: 'login',
         data () {
             return {
                 username: '',
                 password: '',
-                isLoggingIn: false
+                err: ''
             }
         },
+        computed: mapGetters([
+            'signingIn',
+            'authenticated'
+        ]),
         methods: {
-            login () {
-                this.$router.push({name: 'import-scanner'})
-            }
+            async login () {
+                try {
+                    await this.authenticate(this.username, this.password)
+                    if (this.authenticated) {
+                        this.err = 'An error occurred'
+                    } else {
+                        this.$router.push({name: 'import-scanner'})
+                    }
+                } catch (error) {
+                    console.error('login@Login.vue', error)
+                }
+            },
+            ...mapActions([
+                'authenticate'
+            ])
         }
     }
 </script>
@@ -74,5 +94,8 @@
     }
     .btn {
         margin-bottom: 12px;
+    }
+    .err {
+        color: red;
     }
 </style>

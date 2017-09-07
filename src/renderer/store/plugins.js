@@ -2,7 +2,8 @@
  * Created by dummy on 4/10/17.
  * Edited by DE_DZ_TBH on 9/6/17.
  */
-import fs from 'fs'
+import * as types from './mutation-types'
+import {UserToken} from '../models/user'
 
 function localStoragePlugin (mut, preprocess) {
     const deserialize = JSON.parse
@@ -26,11 +27,8 @@ function localStoragePlugin (mut, preprocess) {
     }
 }
 
-export const localEventStoragePlugin = localStoragePlugin(types.SET_LOCAL_EVENTS, ({localEvents}) => {
-    if (!localEvents) {
-        return localEvents
-    }
-    return {localEvents: localEvents.map(localEvent => new LocalEvent(localEvent))}
+export const authStoragePlugin = localStoragePlugin(types.SET_USER_TOKEN, ({token}) => {
+    return {token: token ? new UserToken(token) : token}
 })
 
 // export const eventBrokenPersistencePlugin = store => {
@@ -60,4 +58,3 @@ export const localEventStoragePlugin = localStoragePlugin(types.SET_LOCAL_EVENTS
 // export const studentStoragePatchPlugin = localStoragePatchPlugin(types.PATCH_CURRENT_STUDENT, types.SET_ALL_STUDENTS, (old, patch, store) => {
 //     console.log(old, patch)
 // })
-

@@ -140,7 +140,6 @@
                 }
             },
             selectStudent (index) {
-//                console.log('magic', index)
                 this.selectedIndex = index
             },
             exportCards () {
@@ -163,7 +162,6 @@
             this.connectCallbackUnsubscriber = this.smart.onConnect((reader) => {
                 console.log(self.currentEvent)
                 reader.onInsert((card) => {
-//                    console.log('addRecord', card.atr)
                     self.rfid = card.atr
                 })
                 reader.onError((error) => {

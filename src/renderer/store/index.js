@@ -1,8 +1,8 @@
-import Vue from 'vue'
 import Vuex from 'vuex'
+import Vue from 'vue'
 
 import modules from './modules'
-import plugins from './plugins'
+import * as plugins from './plugins'
 
 Vue.use(Vuex)
 
