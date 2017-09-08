@@ -8,8 +8,43 @@ import store from './store'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'font-awesome/css/font-awesome.min.css'
 
+import {ConnectionWatcher} from './watcher/connection'
+
 export const axia = axios.create({
-    baseURL: 'https://api.aofactivities.com/'
+    baseURL: 'https://api.aofactivities.com/',
+    headers: {
+        Authorization: ''
+    },
+    transformRequest: [data => {
+        if (data) {
+            return Object.keys(data).map(key => {
+                return {key: key, value: data[key]}
+            }).reduce((formData, entry) => {
+                const value = entry.value
+                if (value !== undefined && value !== null) {
+                    switch (typeof value) {
+                        case 'object':
+                            formData.append(entry.key, JSON.stringify(value))
+                            break
+                        default:
+                            formData.append(entry.key, value)
+                            break
+                    }
+                }
+                return formData
+            }, new FormData())
+        } else {
+            return data
+        }
+    }],
+    transformResponse: [data => {
+        // iView.LoadingBar.finish()
+        return data ? JSON.parse(data) : data
+    }]
+})
+
+export const connectionWatcher = new ConnectionWatcher(() => {
+    store.dispatch('verify')
 })
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))

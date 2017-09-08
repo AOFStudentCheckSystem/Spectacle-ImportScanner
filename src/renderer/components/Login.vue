@@ -46,15 +46,21 @@
                 err: ''
             }
         },
-        computed: mapGetters([
-            'signingIn',
-            'authenticated'
-        ]),
+        computed: {
+            ...mapGetters([
+                'signingIn',
+                'authenticated',
+                'offline'
+            ])
+        },
         methods: {
             async login () {
                 try {
-                    await this.authenticate(this.username, this.password)
-                    if (this.authenticated) {
+                    await this.authenticate({
+                        email: this.username,
+                        password: this.password
+                    })
+                    if (!this.authenticated) {
                         this.err = 'An error occurred'
                     } else {
                         this.$router.push({name: 'import-scanner'})
@@ -66,6 +72,13 @@
             ...mapActions([
                 'authenticate'
             ])
+        },
+        watch: {
+            offline (val) {
+                if (!val) {
+                    this.$router.push({name: 'import-scanner'})
+                }
+            }
         }
     }
 </script>
