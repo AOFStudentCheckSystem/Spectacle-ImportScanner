@@ -78,7 +78,7 @@ const actions = {
     async verify ({commit, state, getters, dispatch}) {
         try {
             const token = await api.verify()
-            console.log('aaa')
+            // console.log('aaa')
             if (getters.offline) {
                 commit(types.ADD_CONSISTENCY)
                 if (state.consistency > STABLE) {

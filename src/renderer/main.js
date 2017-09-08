@@ -11,7 +11,7 @@ import 'font-awesome/css/font-awesome.min.css'
 import {ConnectionWatcher} from './watcher/connection'
 
 export const axia = axios.create({
-    baseURL: 'https://api.aofactivities.com/',
+    baseURL: 'http://10.0.1.20:19000/',
     headers: {
         Authorization: ''
     },

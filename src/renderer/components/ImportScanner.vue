@@ -3,14 +3,14 @@
         <div class="align-vertical col-xs-3">
             <div class='row'>
                 <div class='col-xs-12'>
-                    <h4>...'s card registered successfully!</h4>
+                    <h4>Last registered: None</h4>
                 </div>
             </div>
             <br>
             <div class='row'>
                 <div class='col-xs-12'>
-                    <button @click="exportCards" class='btn btn-block btn-primary' :disabled="!cards.length">
-                        {{cards.length?'Export cards registered in this session':'No cards registered in this session'}}
+                    <button @click="exportCards" class='btn btn-block btn-primary' :disabled="!registeredStudents.length">
+                        {{registeredStudents.length?'Export unuploaded registrations':'No unuploaded registrations'}}
                     </button>
                 </div>
             </div>
@@ -25,7 +25,7 @@
                         <div class='input-group' @keyup.enter="register">
                             <label class='input-group-addon' for='barcode'>Barcode</label>
                             <input type='text' id='barcode' class='form-control' v-model='barcode'
-                                   placeholder='' required v-focus>
+                                   placeholder='' required v-focus :disabled="wait">
                         </div><!-- Username Field-->
                         <br>
                         <div class='input-group'>
@@ -35,7 +35,10 @@
                         </div><!-- rfid Field-->
                         <div class='row'>
                             <div class='col-xs-12'>
-                                <h5>Scan card and focus on barcode then press enter to register.</h5>
+                                <h5>Scan card and enter barcode to register.</h5>
+                                <br>
+                                <h5>Last student list update: {{lastUpdateTime}}</h5>
+                                <h5>Click the refresh button on the right to update.</h5>
                             </div>
                         </div>
                     </form>
@@ -47,7 +50,7 @@
                 <input type='text' class='form-control' v-model='search'
                        placeholder='search for firstname, lastname or nickname' required>
                 <span class="input-group-btn">
-                    <button class="btn btn-default" type="button"><i class="fa fa-refresh"></i></button>
+                    <button class="btn btn-default" type="button" @click="getStudents"><i class="fa fa-refresh"></i></button>
                 </span>
             </div>
             <ul class="list-group list-group-height" v-if="displaying.length <= maxDisplay">
@@ -58,11 +61,15 @@
             <h3 class="list-group-height" v-else>Please type more letters</h3>
             <div class="panel panel-default">
                 <div class="panel-body">
-                    <p v-if="selectedIndex === -1">いいえ</p>
+                    <div v-if="selectedIndex === -1">
+                        <p>何でもない</p>
+                        <p>什么都没有</p>
+                        <p>Nothing here</p>
+                    </div>
                     <div class="detail" v-else>
                         <p>{{magicStudent.firstName}} {{magicStudent.lastName}} ({{magicStudent.preferredName}})</p>
                         <p>Barcode:{{magicStudent.idNumber}}</p>
-                        <button class='btn btn-block btn-primary' @click="barcode = magicStudent.idNumber">
+                        <button class='btn btn-block btn-primary' @click="barcode = magicStudent.idNumber; register()">
                             Insert Barcode
                         </button>
                     </div>
@@ -73,6 +80,8 @@
 </template>
 <script>
     import {SmartCardController} from '../smartcard/smartcard'
+    import {mapGetters, mapActions} from 'vuex'
+    import moment from 'moment'
 
     export default {
         name: 'import-scanner',
@@ -83,36 +92,10 @@
                 smart: null,
                 errorCallbackUnsubscriber: null,
                 connectCallbackUnsubscriber: null,
-                cards: [],
                 search: '',
                 selectedIndex: -1,
                 maxDisplay: 25,
-                students: [
-                    {
-                        lastName: '1da',
-                        firstName: 'lao',
-                        preferredName: 'julao',
-                        idNumber: '123'
-                    },
-                    {
-                        lastName: '2da',
-                        firstName: 'lao',
-                        preferredName: 'julao',
-                        idNumber: '124'
-                    },
-                    {
-                        lastName: '3da',
-                        firstName: 'lao',
-                        preferredName: 'julao',
-                        idNumber: '125'
-                    },
-                    {
-                        lastName: '4da',
-                        firstName: 'lao',
-                        preferredName: 'julao',
-                        idNumber: '126'
-                    }
-                ]
+                wait: false
             }
         },
         computed: {
@@ -129,22 +112,41 @@
                 } catch (err) {
                     return null
                 }
+            },
+            ...mapGetters([
+                'registeredStudents',
+                'authenticated',
+                'students',
+                'lastUpdate'
+            ]),
+            lastUpdateTime () {
+                return this.lastUpdate ? moment(this.lastUpdate).format('lll') : 'Never'
             }
         },
         methods: {
-            register () {
+            async register () {
                 if (this.rfid === '') {
                     console.log('Wait')
+                    this.wait = true
                 } else {
                     console.log('注册')
+                    await this.sendRegister()
                 }
+            },
+            async sendRegister () {
+                console.log('啦', this.barcode, this.rfid)
+                this.rfid = ''
+                this.barcode = ''
             },
             selectStudent (index) {
                 this.selectedIndex = index
             },
             exportCards () {
 
-            }
+            },
+            ...mapActions([
+                'getStudents'
+            ])
         },
         directives: {
             focus: {
@@ -163,6 +165,10 @@
                 console.log(self.currentEvent)
                 reader.onInsert((card) => {
                     self.rfid = card.atr
+                    if (self.wait) {
+                        self.sendRegister()
+                        self.wait = false
+                    }
                 })
                 reader.onError((error) => {
                     console.log(error)
@@ -178,6 +184,19 @@
             }
             if (this.connectCallbackUnsubscriber) {
                 this.connectCallbackUnsubscriber()
+            }
+        },
+        watch: {
+            barcode () {
+                this.barcode = this.barcode.replace(/\D/g, '')
+            },
+            rfid () {
+                this.rfid = this.rfid.toUpperCase()
+            },
+            authenticated (val) {
+                if (!val) {
+                    this.$router.push({name: 'login'})
+                }
             }
         }
     }
