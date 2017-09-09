@@ -7,8 +7,11 @@
                 </div>
                 <div class='col-xs-12'>
                     <p>These are {{registeredStudents.length}} unuploaded registrations.</p>
-                    <button @click="uploadStudents" class='btn btn-block btn-primary' :disabled="!registeredStudents.length">
+                    <button @click="uploadStudents" class='btn btn-block btn-primary' :disabled="!registeredStudents.length || offline">
                         {{registeredStudents.length?'Manually upload registrations':'No unuploaded registrations'}}
+                    </button>
+                    <button @click="exportFile(registeredStudents)" class='btn btn-block btn-warning' :disabled="!registeredStudents.length">
+                        Export unuploaded registrations
                     </button>
                 </div>
                 <div class='col-xs-12'>
@@ -16,7 +19,7 @@
                     <br>
                     <p>Broken registrations will NOT be kept after window is closed!</p>
                     <p>These are {{failedRegisters.length}} broken registrations.</p>
-                    <button @click="exportBroken" class='btn btn-block btn-warning' :disabled="failedRegisters.length">
+                    <button @click="exportFile(failedRegisters)" class='btn btn-block btn-warning' :disabled="!failedRegisters.length">
                         Export broken registrations
                     </button>
                 </div>
@@ -175,8 +178,7 @@
                 newStu.cardSecret = this.rfid.toUpperCase()
                 this.log.push(newStu)
                 this.log[this.log.length - 1].time = moment().format('')
-                this.SET_REGISTERED_STUDENTS({students: this.registeredStudents.concat(newStu)})
-                this.rfid = ''
+                this.SET_REGISTERED_STUDENTS({students: this.registeredStudents.concat(newStu), replaceMarker: !!this.rfidOwner})
                 this.barcode = ''
             },
             selectStudent (index) {
@@ -188,15 +190,14 @@
                     this.failedRegisters.push(r.errorRegistration)
                 }
             },
-            exportBroken () {
-                const self = this
+            exportFile (sth) {
                 this.$electron.remote.dialog.showSaveDialog({
                     properties: [
                         'openFile', 'createDirectory'
                     ]
                 }, (filePaths) => {
-                    if (filePaths && filePaths.length) {
-                        fs.writeFile(filePaths[0], JSON.stringify(self.failedRegisters), 'utf8', (err) => {
+                    if (filePaths) {
+                        fs.writeFile(filePaths, JSON.stringify(sth), 'utf8', (err) => {
                             if (err) {
                                 alert(err)
                             }
