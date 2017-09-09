@@ -6,7 +6,7 @@
   "license": null,
   "main": "./dist/electron/main.js",
   "scripts": {
-    "build": "node .electron-vue/build.js && electron-builder",
+    "build": "node .electron-vue/build.js && electron-builder -wl",
     "build:dir": "node .electron-vue/build.js && electron-builder --dir",
     "build:clean": "cross-env BUILD_TARGET=clean node .electron-vue/build.js",
     "build:web": "cross-env BUILD_TARGET=web node .electron-vue/build.js",
@@ -16,12 +16,12 @@
     "pack": "npm run pack:main && npm run pack:renderer",
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
-    "postinstall": "yarn run lint:fix && yarn rebuild",
+    "postinstall": "electron-builder install-app-deps && yarn run lint:fix && yarn rebuild",
     "rebuild": "electron-rebuild"
   },
   "build": {
     "productName": "spectacle-import_scanner",
-    "appId": "org.simulatedgreg.electron-vue",
+    "appId": "cn.com.guardiantech.aofcheck.spectacleimportscanner",
     "directories": {
       "output": "build"
     },
@@ -44,14 +44,34 @@
       ]
     },
     "mac": {
-      "icon": "build/icons/icon.icns"
+      "icon": "build/icons/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     },
     "win": {
-      "icon": "build/icons/icon.ico"
+      "icon": "build/icons/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "7z",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
     },
-    "linux": {
-      "icon": "build/icons"
-    }
+    "asar": true
   },
   "dependencies": {
     "@pokusew/pcsclite": "^0.4.18",
