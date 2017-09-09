@@ -5,7 +5,7 @@ export default{
     async getStudents () {
         return (await axia.get('student/listall')).data
     },
-    async registerStudent (idNumber, cardSecret) {
-        return Student((await axia.post('student/edit', {idNumber: idNumber, cardSecret: cardSecret})).data)
+    async registerStudent (studentId, cardSecret) {
+        return new Student((await axia.post('student/edit/bind-card', {studentId: studentId, cardSecret: cardSecret})).data)
     }
 }

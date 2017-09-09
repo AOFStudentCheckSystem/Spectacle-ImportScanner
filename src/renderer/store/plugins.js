@@ -39,3 +39,9 @@ export const studentsStoragePlugin = localStoragePlugin(types.SET_STUDENTS, ({st
         return new Student(s)
     })}
 })
+
+export const registeredStudentsStoragePlugin = localStoragePlugin(types.SET_REGISTERED_STUDENTS, ({students}) => {
+    return {students: students.map((s) => {
+        return new Student(s)
+    })}
+})

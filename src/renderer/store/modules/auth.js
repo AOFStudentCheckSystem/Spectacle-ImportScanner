@@ -78,16 +78,13 @@ const actions = {
     async verify ({commit, state, getters, dispatch}) {
         try {
             const token = await api.verify()
-            // console.log('aaa')
-            if (getters.offline) {
-                commit(types.ADD_CONSISTENCY)
-                if (state.consistency > STABLE) {
-                    commit(types.SET_USER_TOKEN, {token: token})
-                    // dispatch('sth')
-                }
-            }
             if (!state.online) {
                 commit(types.SET_ONLINE, {online: true})
+            }
+            commit(types.ADD_CONSISTENCY)
+            commit(types.SET_USER_TOKEN, {token: token})
+            if (state.consistency > STABLE) {
+                dispatch('uploadRegisteredStudents')
             }
         } catch (e) {
             if (e.response) {

@@ -36,6 +36,8 @@
                         <div class='row'>
                             <div class='col-xs-12'>
                                 <h5>Scan card and enter barcode to register.</h5>
+                                <h5 v-if="rfid && rfidOwner">{{rfidOwner.firstName}} {{rfidOwner.lastName}} ({{rfidOwner.preferredName}}) owns this card.</h5>
+                                <h5 v-if="rfid && !rfidOwner">No one owns this card yet.</h5>
                                 <br>
                                 <h5>Last student list update: {{lastUpdateTime}}</h5>
                                 <h5>Click the refresh button on the right to update.</h5>
@@ -80,7 +82,7 @@
 </template>
 <script>
     import {SmartCardController} from '../smartcard/smartcard'
-    import {mapGetters, mapActions} from 'vuex'
+    import {mapGetters, mapActions, mapMutations} from 'vuex'
     import moment from 'moment'
 
     export default {
@@ -121,6 +123,12 @@
             ]),
             lastUpdateTime () {
                 return this.lastUpdate ? moment(this.lastUpdate).format('lll') : 'Never'
+            },
+            rfidOwner () {
+                let stus = this.students.filter((s) => {
+                    return s.cardSecret && this.rfid.toUpperCase() === s.cardSecret.toUpperCase()
+                })
+                return stus.length ? stus[0] : null
             }
         },
         methods: {
@@ -135,6 +143,17 @@
             },
             async sendRegister () {
                 console.log('啦', this.barcode, this.rfid)
+                let newStus = this.students.filter((s) => {
+                    return this.barcode === s.idNumber
+                })
+                if (!newStus.length) {
+                    // Student Not Found
+                    console.error('Student Not Found With Barcode')
+                    return
+                }
+                let newStu = JSON.parse(JSON.stringify(newStus[0]))
+                newStu.cardSecret = this.rfid
+                this.SET_REGISTERED_STUDENTS({students: this.registeredStudents.concat(newStu)})
                 this.rfid = ''
                 this.barcode = ''
             },
@@ -146,6 +165,9 @@
             },
             ...mapActions([
                 'getStudents'
+            ]),
+            ...mapMutations([
+                'SET_REGISTERED_STUDENTS'
             ])
         },
         directives: {
@@ -170,6 +192,12 @@
                         self.wait = false
                     }
                 })
+                reader.onEmpty((card) => {
+                    self.rfid = ''
+                    if (self.wait) {
+                        self.wait = false
+                    }
+                })
                 reader.onError((error) => {
                     console.log(error)
                 })
@@ -187,11 +215,10 @@
             }
         },
         watch: {
-            barcode () {
-                this.barcode = this.barcode.replace(/\D/g, '')
-            },
-            rfid () {
-                this.rfid = this.rfid.toUpperCase()
+            barcode (newValue) {
+                if (typeof newValue === 'string') {
+                    this.barcode = newValue.replace(/\D/g, '')
+                }
             },
             authenticated (val) {
                 if (!val) {
