@@ -3,7 +3,7 @@
         <div class="align-vertical col-xs-3">
             <div class='row'>
                 <div class='col-xs-12'>
-                    <h4>Last registered: None</h4>
+                    <h4>Last registered: {{lastRegisterName}}</h4>
                 </div>
             </div>
             <br>
@@ -36,7 +36,7 @@
                         <div class='row'>
                             <div class='col-xs-12'>
                                 <h5>Scan card and enter barcode to register.</h5>
-                                <h5 v-if="rfid && rfidOwner">{{rfidOwner.firstName}} {{rfidOwner.lastName}} ({{rfidOwner.preferredName}}) owns this card.</h5>
+                                <h5 v-if="rfid && rfidOwner">{{displayName(rfidOwner)}} owns this card.</h5>
                                 <h5 v-if="rfid && !rfidOwner">No one owns this card yet.</h5>
                                 <br>
                                 <h5>Last student list update: {{lastUpdateTime}}</h5>
@@ -57,7 +57,7 @@
             </div>
             <ul class="list-group list-group-height" v-if="displaying.length <= maxDisplay">
                 <li class="list-group-item" :class="{'active': selectedIndex === index}" v-for="(student, index) in displaying" @click="selectStudent(index)">
-                    {{student.firstName}} {{student.lastName}} ({{student.preferredName}})
+                    {{displayName(student)}}
                 </li>
             </ul>
             <h3 class="list-group-height" v-else>Please type more letters</h3>
@@ -69,7 +69,7 @@
                         <p>Nothing here</p>
                     </div>
                     <div class="detail" v-else>
-                        <p>{{magicStudent.firstName}} {{magicStudent.lastName}} ({{magicStudent.preferredName}})</p>
+                        <p>{{displayName(magicStudent)}}</p>
                         <p>Barcode:{{magicStudent.idNumber}}</p>
                         <button class='btn btn-block btn-primary' @click="barcode = magicStudent.idNumber; register()">
                             Insert Barcode
@@ -119,10 +119,15 @@
                 'registeredStudents',
                 'authenticated',
                 'students',
-                'lastUpdate'
+                'lastUpdate',
+                'lastRegister'
             ]),
             lastUpdateTime () {
                 return this.lastUpdate ? moment(this.lastUpdate).format('lll') : 'Never'
+            },
+            lastRegisterName () {
+                console.log('lastRegister', this.lastRegister)
+                return this.lastRegister ? this.displayName(this.lastRegister) : 'None'
             },
             rfidOwner () {
                 let stus = this.students.filter((s) => {
@@ -138,10 +143,10 @@
                     this.wait = true
                 } else {
                     console.log('注册')
-                    await this.sendRegister()
+                    this.sendRegister()
                 }
             },
-            async sendRegister () {
+            sendRegister () {
                 console.log('啦', this.barcode, this.rfid)
                 let newStus = this.students.filter((s) => {
                     return this.barcode === s.idNumber
@@ -168,7 +173,10 @@
             ]),
             ...mapMutations([
                 'SET_REGISTERED_STUDENTS'
-            ])
+            ]),
+            displayName (student) {
+                return student ? student.firstName + ' ' + student.lastName + ' (' + student.preferredName + ')' : ''
+            }
         },
         directives: {
             focus: {

@@ -2,14 +2,18 @@
  * Created by DE_DZ_TBH on 9/6/17.
  */
 
-import {SET_STUDENTS, SET_REGISTERED_STUDENTS, SET_LAST_UPDATE, CLEAR_CONSISTENCY, SET_REGISTERED_STUDENTS_UPLOADING} from '../mutation-types'
+import {
+    SET_STUDENTS, SET_REGISTERED_STUDENTS, SET_LAST_UPDATE, CLEAR_CONSISTENCY, SET_REGISTERED_STUDENTS_UPLOADING,
+    SET_LAST_REGISTER
+} from '../mutation-types'
 import api from '../../api/students'
 
 const state = {
     students: [],
     registeredStudents: [],
     lastUpdate: null,
-    registeredStudentsUploading: false
+    registeredStudentsUploading: false,
+    lastRegister: null
 }
 
 const getters = {
@@ -21,6 +25,9 @@ const getters = {
     },
     lastUpdate (state) {
         return state.lastUpdate
+    },
+    lastRegister (state) {
+        return state.lastRegister
     }
 }
 
@@ -36,6 +43,9 @@ const mutations = {
     },
     [SET_REGISTERED_STUDENTS_UPLOADING] (state, uploading) {
         state.registeredStudentsUploading = uploading
+    },
+    [SET_LAST_REGISTER] (state, lastReg) {
+        state.lastRegister = lastReg
     }
 }
 
@@ -55,6 +65,7 @@ const actions = {
                 while (state.registeredStudents.length) {
                     let first = state.registeredStudents[0]
                     await api.registerStudent(first.idNumber, first.cardSecret.toUpperCase())
+                    commit(SET_LAST_REGISTER, first)
                     commit(SET_REGISTERED_STUDENTS, {students: state.registeredStudents.slice(1)})
                 }
             } catch (err) {
