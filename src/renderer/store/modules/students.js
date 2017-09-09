@@ -57,23 +57,34 @@ const actions = {
             commit(SET_LAST_UPDATE, {lastUpdate: new Date().getTime()})
         } catch (err) {}
     },
-    async uploadRegisteredStudents ({state, commit, getter}) {
+    async uploadRegisteredStudents ({state, commit}) {
+        let ret = {success: true}
         if (!state.registeredStudentsUploading) {
             commit(SET_REGISTERED_STUDENTS_UPLOADING, true)
             console.log('uploadRegisteredStudents')
             try {
                 while (state.registeredStudents.length) {
                     let first = state.registeredStudents[0]
-                    await api.registerStudent(first.idNumber, first.cardSecret.toUpperCase())
+                    await api.registerStudent(first.idNumber, first.cardSecret)
                     commit(SET_LAST_REGISTER, first)
                     commit(SET_REGISTERED_STUDENTS, {students: state.registeredStudents.slice(1)})
                 }
+                // Success
             } catch (err) {
                 console.log(err)
                 commit(CLEAR_CONSISTENCY)
+                if (err.response && err.response.status >= 500) {
+                    // Critical Error
+                    ret = {success: false, errorRegistration: state.registeredStudents[0]}
+                    commit(SET_REGISTERED_STUDENTS, {students: state.registeredStudents.slice(1)})
+                } else {
+                    // Token expire or no internet
+                    ret = {success: false}
+                }
             }
             commit(SET_REGISTERED_STUDENTS_UPLOADING, false)
         }
+        return ret
     }
 }
 

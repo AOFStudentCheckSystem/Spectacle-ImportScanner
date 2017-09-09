@@ -58,6 +58,7 @@
     "axios": "^0.16.1",
     "bootstrap": "3",
     "font-awesome": "^4.7.0",
+    "fs": "^0.0.1-security",
     "hexify": "^1.0.1",
     "moment": "^2.18.1",
     "vue": "^2.3.3",

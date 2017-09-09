@@ -3,14 +3,21 @@
         <div class="align-vertical col-xs-3">
             <div class='row'>
                 <div class='col-xs-12'>
-                    <h4>Last registered: {{lastRegisterName}}</h4>
+                    <h4>Last uploaded: {{lastRegisterName}}</h4>
                 </div>
-            </div>
-            <br>
-            <div class='row'>
                 <div class='col-xs-12'>
-                    <button @click="exportCards" class='btn btn-block btn-primary' :disabled="!registeredStudents.length">
-                        {{registeredStudents.length?'Export unuploaded registrations':'No unuploaded registrations'}}
+                    <p>These are {{registeredStudents.length}} unuploaded registrations.</p>
+                    <button @click="uploadStudents" class='btn btn-block btn-primary' :disabled="!registeredStudents.length">
+                        {{registeredStudents.length?'Manually upload registrations':'No unuploaded registrations'}}
+                    </button>
+                </div>
+                <div class='col-xs-12'>
+                    <br>
+                    <br>
+                    <p>Broken registrations will NOT be kept after window is closed!</p>
+                    <p>These are {{failedRegisters.length}} broken registrations.</p>
+                    <button @click="exportBroken" class='btn btn-block btn-warning' :disabled="failedRegisters.length">
+                        Export broken registrations
                     </button>
                 </div>
             </div>
@@ -18,7 +25,12 @@
         <div class="align-vertical col-xs-5">
             <div class='panel' id='loginPanel'>
                 <div class='panel-heading'>
-                    <h3 align='center'>Almost There</h3>
+                    <h3 align='center'>
+                        You are {{offline ? 'Offline' : 'Online'}}
+                    </h3>
+                    <h4 align='center' v-if="!authenticated">
+                        <router-link :to="{name: 'login'}">Please click here to login again!</router-link>
+                    </h4>
                 </div>
                 <div class='panel-body'>
                     <form>
@@ -84,6 +96,7 @@
     import {SmartCardController} from '../smartcard/smartcard'
     import {mapGetters, mapActions, mapMutations} from 'vuex'
     import moment from 'moment'
+    import fs from 'fs'
 
     export default {
         name: 'import-scanner',
@@ -97,7 +110,9 @@
                 search: '',
                 selectedIndex: -1,
                 maxDisplay: 25,
-                wait: false
+                wait: false,
+                failedRegisters: [],
+                log: []
             }
         },
         computed: {
@@ -120,10 +135,11 @@
                 'authenticated',
                 'students',
                 'lastUpdate',
-                'lastRegister'
+                'lastRegister',
+                'offline'
             ]),
             lastUpdateTime () {
-                return this.lastUpdate ? moment(this.lastUpdate).format('lll') : 'Never'
+                return this.lastUpdate ? moment(this.lastUpdate).fromNow() : 'Never'
             },
             lastRegisterName () {
                 console.log('lastRegister', this.lastRegister)
@@ -147,7 +163,6 @@
                 }
             },
             sendRegister () {
-                console.log('啦', this.barcode, this.rfid)
                 let newStus = this.students.filter((s) => {
                     return this.barcode === s.idNumber
                 })
@@ -157,7 +172,9 @@
                     return
                 }
                 let newStu = JSON.parse(JSON.stringify(newStus[0]))
-                newStu.cardSecret = this.rfid
+                newStu.cardSecret = this.rfid.toUpperCase()
+                this.log.push(newStu)
+                this.log[this.log.length - 1].time = moment().format('')
                 this.SET_REGISTERED_STUDENTS({students: this.registeredStudents.concat(newStu)})
                 this.rfid = ''
                 this.barcode = ''
@@ -165,11 +182,31 @@
             selectStudent (index) {
                 this.selectedIndex = index
             },
-            exportCards () {
-
+            async uploadStudents () {
+                let r = await this.uploadRegisteredStudents()
+                if (!r.success && r.errorRegistration) {
+                    this.failedRegisters.push(r.errorRegistration)
+                }
+            },
+            exportBroken () {
+                const self = this
+                this.$electron.remote.dialog.showSaveDialog({
+                    properties: [
+                        'openFile', 'createDirectory'
+                    ]
+                }, (filePaths) => {
+                    if (filePaths && filePaths.length) {
+                        fs.writeFile(filePaths[0], JSON.stringify(self.failedRegisters), 'utf8', (err) => {
+                            if (err) {
+                                alert(err)
+                            }
+                        })
+                    }
+                })
             },
             ...mapActions([
-                'getStudents'
+                'getStudents',
+                'uploadRegisteredStudents'
             ]),
             ...mapMutations([
                 'SET_REGISTERED_STUDENTS'
