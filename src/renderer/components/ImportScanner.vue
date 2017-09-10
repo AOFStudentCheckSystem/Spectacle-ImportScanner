@@ -75,7 +75,7 @@
                     {{displayName(student)}}
                 </li>
             </ul>
-            <h3 class="list-group-height" v-else>Please type more letters</h3>
+            <h4 class="list-group-height" v-else>Please type more letters</h4>
             <div class="panel panel-default">
                 <div class="panel-body">
                     <div v-if="selectedIndex === -1">
@@ -123,7 +123,10 @@
                 this.selectedIndex = -1
                 return this.students.filter((s) => {
                     let sr = this.search.toUpperCase()
-                    return s.lastName.toUpperCase().indexOf(sr) >= 0 || s.firstName.indexOf(sr) >= 0 || s.preferredName.indexOf(sr) >= 0
+//                    if (!sr || !s.lastName || !s.firstName || !s.preferredName) {
+//                        console.warn('a', sr, s.lastName, s.firstName, s.preferredName)
+//                    }
+                    return this.find(s.lastName, sr) || this.find(s.firstName, sr) || this.find(s.preferredName, sr)
                 })
             },
             magicStudent () {
@@ -164,6 +167,12 @@
                     console.log('注册')
                     this.sendRegister()
                 }
+            },
+            find (orig, search) {
+                if (!orig || !search) {
+                    return false
+                }
+                return orig.toUpperCase().indexOf(search) >= 0
             },
             sendRegister () {
                 let newStus = this.students.filter((s) => {
