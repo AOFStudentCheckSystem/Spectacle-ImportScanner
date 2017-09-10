@@ -131,7 +131,7 @@
             },
             magicStudent () {
                 try {
-                    return this.students[this.selectedIndex]
+                    return this.displaying[this.selectedIndex]
                 } catch (err) {
                     return null
                 }
