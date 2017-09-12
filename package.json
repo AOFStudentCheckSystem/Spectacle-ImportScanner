@@ -57,7 +57,7 @@
     "win": {
       "icon": "build/icons/icon.ico",
       "target": [
-         {
+        {
           "target": "nsis",
           "arch": [
             "x64"
@@ -77,10 +77,12 @@
     "@pokusew/pcsclite": "^0.4.18",
     "axios": "^0.16.1",
     "bootstrap": "3",
+    "electron-updater": "^2.8.9",
     "font-awesome": "^4.7.0",
     "fs": "^0.0.1-security",
     "hexify": "^1.0.1",
     "moment": "^2.18.1",
+    "v-toaster": "^1.0.2",
     "vue": "^2.3.3",
     "vue-electron": "^1.0.6",
     "vue-router": "^2.5.3",

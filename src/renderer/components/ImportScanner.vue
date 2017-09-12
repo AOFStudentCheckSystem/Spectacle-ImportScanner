@@ -65,7 +65,7 @@
         <div class="col-xs-4">
             <div class='input-group'>
                 <input type='text' class='form-control' v-model='search'
-                       placeholder='search for firstname, lastname or nickname' required>
+                       placeholder='search for name or barcode' required>
                 <span class="input-group-btn">
                     <button class="btn btn-default" type="button" @click="getStudents"><i class="fa fa-refresh"></i></button>
                 </span>
@@ -123,10 +123,10 @@
                 this.selectedIndex = -1
                 return this.students.filter((s) => {
                     let sr = this.search.toUpperCase()
-//                    if (!sr || !s.lastName || !s.firstName || !s.preferredName) {
-//                        console.warn('a', sr, s.lastName, s.firstName, s.preferredName)
-//                    }
-                    return this.find(s.lastName, sr) || this.find(s.firstName, sr) || this.find(s.preferredName, sr)
+                    //                    if (!sr || !s.lastName || !s.firstName || !s.preferredName) {
+                    //                        console.warn('a', sr, s.lastName, s.firstName, s.preferredName)
+                    //                    }
+                    return this.find(s.lastName, sr) || this.find(s.firstName, sr) || this.find(s.preferredName, sr) || this.find(s.idNumber.toString(), sr)
                 })
             },
             magicStudent () {
@@ -180,6 +180,7 @@
                 })
                 if (!newStus.length) {
                     // Student Not Found
+                    this.$toaster.error('Student Not Found With Barcode')
                     console.error('Student Not Found With Barcode')
                     return
                 }
@@ -236,6 +237,7 @@
             const self = this
             this.smart = new SmartCardController()
             this.errorCallbackUnsubscriber = this.smart.onError((error) => {
+                self.$toaster.error(error)
                 console.log(error)
             })
             this.connectCallbackUnsubscriber = this.smart.onConnect((reader) => {
@@ -254,6 +256,7 @@
                     }
                 })
                 reader.onError((error) => {
+                    self.$toaster.error(error)
                     console.log(error)
                 })
             })
