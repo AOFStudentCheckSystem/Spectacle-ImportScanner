@@ -34,7 +34,7 @@ const getters = {
 const mutations = {
     [types.SET_USER_TOKEN] (state, {token}) {
         const op = () => {
-            axia.defaults.headers = {Authorization: token ? token.token : null}
+            axia.defaults.headers = {Authorization: token ? token.sessionKey : null}
         }
         if (axia) {
             op()
@@ -62,29 +62,35 @@ const mutations = {
 const actions = {
     async authenticate ({commit}, {email, password}) {
         commit(types.SET_SIGNING_IN, {signingIn: true})
-        try {
-            const userToken = await api.authenticate(email, password)
-            if (userToken.user.isAuthorized(900)) {
-                commit(types.SET_USER_TOKEN, {token: userToken})
-                commit(types.SET_ONLINE, {online: true})
-            } else {
-                throw new Error('Unauthorized')
-            }
-            commit(types.SET_SIGNING_IN, {signingIn: false})
-        } catch (err) {
-            commit(types.SET_SIGNING_IN, {signingIn: false})
+        const userToken = await api.authenticate(email, password)
+        if (userToken.isAuthorized('TABLET')) {
+            commit(types.SET_USER_TOKEN, {token: userToken})
+        } else {
+            throw new Error('Unauthorized')
         }
+        window.setTimeout(() => {
+            commit(types.SET_SIGNING_IN, {signingIn: false})
+        }, 10000)
     },
-    async verify ({commit, state, getters, dispatch}) {
+    async verify ({commit, state, dispatch}) {
+        // if (!state.token) {
+        //     if (!state.offline) {
+        //         commit(types.SET_OFFLINE, {offline: true})
+        //     }
+        //     return
+        // }
         try {
             const token = await api.verify()
+            if (state.offline) {
+                commit(types.ADD_CONSISTENCY)
+                if (state.consistency > 4) {
+                    commit(types.SET_USER_TOKEN, {token: token})
+                    dispatch('syncLocalEvents')
+                    dispatch('syncAllStudents')
+                }
+            }
             if (!state.online) {
                 commit(types.SET_ONLINE, {online: true})
-            }
-            commit(types.ADD_CONSISTENCY)
-            commit(types.SET_USER_TOKEN, {token: token})
-            if (state.consistency > STABLE) {
-                dispatch('uploadRegisteredStudents')
             }
         } catch (e) {
             if (e.response) {
@@ -97,14 +103,16 @@ const actions = {
                     commit(types.SET_ONLINE, {online: true})
                 }
             } else {
-                if (!getters.offline) {
-                    commit(types.SET_ONLINE, {online: false})
+                if (!state.offline) {
                     console.error(e)
                 }
             }
-            commit(types.CLEAR_CONSISTENCY)
+            if (!state.offline) {
+                commit(types.SET_ONLINE, {online: false})
+                commit(types.CLEAR_CONSISTENCY)
+            }
         }
-    }
+    },
 }
 
 export default {

@@ -19,32 +19,32 @@ import 'v-toaster/dist/v-toaster.css'
 Vue.use(Toaster, {timeout: 5000})
 
 export const axia = axios.create({
-    baseURL: 'http://api.aofactivities.com/',
+    baseURL: 'https://apiv2.aofportal.org/',
     headers: {
         Authorization: ''
     },
-    transformRequest: [data => {
-        if (data) {
-            return Object.keys(data).map(key => {
-                return {key: key, value: data[key]}
-            }).reduce((formData, entry) => {
-                const value = entry.value
-                if (value !== undefined && value !== null) {
-                    switch (typeof value) {
-                        case 'object':
-                            formData.append(entry.key, JSON.stringify(value))
-                            break
-                        default:
-                            formData.append(entry.key, value)
-                            break
-                    }
-                }
-                return formData
-            }, new FormData())
-        } else {
-            return data
-        }
-    }],
+    // transformRequest: [data => {
+    //     if (data) {
+    //         return Object.keys(data).map(key => {
+    //             return {key: key, value: data[key]}
+    //         }).reduce((formData, entry) => {
+    //             const value = entry.value
+    //             if (value !== undefined && value !== null) {
+    //                 switch (typeof value) {
+    //                     case 'object':
+    //                         formData.append(entry.key, JSON.stringify(value))
+    //                         break
+    //                     default:
+    //                         formData.append(entry.key, value)
+    //                         break
+    //                 }
+    //             }
+    //             return formData
+    //         }, new FormData())
+    //     } else {
+    //         return data
+    //     }
+    // }],
     transformResponse: [data => {
         // iView.LoadingBar.finish()
         return data ? JSON.parse(data) : data

@@ -4,8 +4,14 @@
 import {Student} from './student'
 export class UserToken {
     constructor (json) {
-        this.token = json.token
-        this.user = new User(json.user)
+        this.sessionKey = json.sessionKey
+        // this.subject = new Subject(json.subject)
+        this.permissions = json.permissions
+        // this.authenticatedFactors = json.authenticatedFactors
+    }
+
+    isAuthorized (permission) {
+        return this.token !== null // TODO: Actually check for permission... Humm. Ikr
     }
 }
 
