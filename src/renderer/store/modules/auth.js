@@ -112,7 +112,7 @@ const actions = {
                 commit(types.CLEAR_CONSISTENCY)
             }
         }
-    },
+    }
 }
 
 export default {

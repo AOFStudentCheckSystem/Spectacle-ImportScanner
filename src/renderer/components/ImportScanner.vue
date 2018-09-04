@@ -121,13 +121,15 @@
         computed: {
             displaying () {
                 this.selectedIndex = -1
-                return this.students.filter((s) => {
-                    let sr = this.search.toUpperCase()
+                let sr = this.search.toUpperCase()
+                let foundStudents = this.students.filter((s) => {
                     //                    if (!sr || !s.lastName || !s.firstName || !s.preferredName) {
                     //                        console.warn('a', sr, s.lastName, s.firstName, s.preferredName)
                     //                    }
                     return this.find(s.lastName, sr) || this.find(s.firstName, sr) || this.find(s.preferredName, sr) || this.find(s.idNumber.toString(), sr)
                 })
+                console.log(foundStudents)
+                return foundStudents
             },
             magicStudent () {
                 try {

@@ -76,7 +76,7 @@ const mutations = {
 const actions = {
     async getStudents ({commit}) {
         try {
-            let students = await api.getStudents()
+            let students = (await api.getStudents())
             commit(types.SET_STUDENTS, {students: students})
             commit(types.SET_LAST_UPDATE, {lastUpdate: new Date().getTime()})
         } catch (err) {}
