@@ -100,8 +100,9 @@
     import {mapGetters, mapActions, mapMutations} from 'vuex'
     import moment from 'moment'
     import fs from 'fs'
+    import {Student} from '../models/student'
 
-    export default {
+export default {
         name: 'import-scanner',
         data () {
             return {
@@ -186,7 +187,7 @@
                     console.error('Student Not Found With Barcode')
                     return
                 }
-                let newStu = JSON.parse(JSON.stringify(newStus[0]))
+                let newStu = new Student(newStus[0])
                 newStu.cardSecret = this.rfid.toUpperCase()
                 this.log.push(newStu)
                 this.log[this.log.length - 1].time = moment().format('')
