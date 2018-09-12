@@ -17,7 +17,9 @@
     "pack:main": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.main.config.js",
     "pack:renderer": "cross-env NODE_ENV=production webpack --progress --colors --config .electron-vue/webpack.renderer.config.js",
     "postinstall": "electron-builder install-app-deps && yarn run lint:fix && yarn rebuild",
-    "rebuild": "electron-rebuild"
+    "rebuild": "electron-rebuild",
+    "rebuild:electron": "./node_modules/.bin/electron-rebuild -f -w '@codetector/pcsclite'",
+    "rebuild:pcsclite": "( cd node_modules/@codetector/pcsclite && node-gyp rebuild --runtime=electron --target=1.8.6 --disturl=https://atom.io/download/atom-shell --abi=53 )"
   },
   "build": {
     "productName": "spectacle-import_scanner",
@@ -74,7 +76,7 @@
     "asar": true
   },
   "dependencies": {
-    "@pokusew/pcsclite": "^0.4.18",
+    "@codetector/pcsclite": "^0.4.19",
     "axios": "^0.16.1",
     "bootstrap": "3",
     "electron-updater": "^2.8.9",
@@ -104,7 +106,7 @@
     "css-loader": "^0.28.4",
     "del": "^3.0.0",
     "devtron": "^1.4.0",
-    "electron": "^1.7.5",
+    "electron": "^1.8.6",
     "electron-builder": "^19.19.1",
     "electron-debug": "^1.4.0",
     "electron-devtools-installer": "^2.2.0",

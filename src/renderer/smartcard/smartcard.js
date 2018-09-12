@@ -2,6 +2,7 @@
  * Created by dummy on 4/3/17.
  */
 import * as hexify from 'hexify'
+
 export class SmartCardController {
     constructor () {
         this.__internal = new SmartCardInternal()
@@ -52,7 +53,7 @@ class SmartCardInternal {
         this.errorCallbacks = {}
         this.readers = {}
 
-        const pcsclite = require('@pokusew/pcsclite')
+        const pcsclite = require('@codetector/pcsclite')
         const pcsc = pcsclite()
 
         const self = this
@@ -178,16 +179,20 @@ class ReaderInternal {
                 } else if ((changes & this.SCARD_STATE_PRESENT) && (status.state & this.SCARD_STATE_PRESENT)) {
                     console.debug('card inserted', status)
                     /* card inserted */
-                    pcscliteReader.connect({share_mode: this.SCARD_SHARE_SHARED}, function (err, protocol) {
-                        if (err) {
-                            console.debug(err)
-                            Object.values(self.errorCallbacks).forEach((e) => e(err))
-                        } else {
-                            const card = new Card(protocol, status.atr.toString('hex'))
-                            console.debug('[INFO] Card(', card.protocol, card.atr, '): Inserted ')
-                            Object.values(self.insertCallbacks).forEach((e) => e(card))
-                        }
-                    })
+                    const card = new Card(2, status.atr.toString('hex'))
+                    Object.values(self.insertCallbacks).forEach((e) => e(card))
+                    // pcscliteReader.connect({share_mode: this.SCARD_SHARE_SHARED}, function (err, protocol) {
+                    //     if (err) {
+                    //         console.debug(err)
+                    //         // Object.values(self.errorCallbacks).forEach((e) => e(err))
+                    //         const card = new Card(2, status.atr.toString('hex'))
+                    //         console.debug('[INFO!] Card(', card.protocol, card.atr, '): Inserted ')
+                    //     } else {
+                    //         const card = new Card(protocol, status.atr.toString('hex'))
+                    //         console.debug('[INFO] Card(', card.protocol, card.atr, '): Inserted ')
+                    //         Object.values(self.insertCallbacks).forEach((e) => e(card))
+                    //     }
+                    // })
                 }
             }
         })
